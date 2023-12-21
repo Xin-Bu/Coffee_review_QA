@@ -6,13 +6,13 @@ The dataset in this project contains two files: coffee_review.pdf and coffee_rev
 | :---:  | :---: | :---: | :---: | :---: | 
 | 41,064 | 3,070 | 6.45  | 0.07  | cup;aroma,mouthfeel,acidity,structure,finish,notes,sweet,cocoa,chocolate,syrupy| 
 
-The purpose of this project is to visualize text data in coffee_review.csv using R and to build a platform to ask and answer questions from the file coffee_review.pdf using python. The R code in this project for the visuals was written in R Markdown and knitted to html. 
+The purpose of this project is to visualize text data in coffee_review.csv using R and to build a platform using python to ask and answer questions from the file coffee_review.pdf. The R code in this project for the visuals was written in R Markdown and knitted to html. 
 
 Here is a wordcloud visual example using R:
 
 ![word_cloud](https://github.com/Xin-Bu/LLMs/assets/69817896/799d1cbe-a81d-47b3-8662-c1d73a1e7ccd)
 
-### Dataset source
+### Data source
 [Coffee Reviews](https://www.kaggle.com/datasets/schmoyote/coffee-reviews-dataset/data)
 
 ### Reference
