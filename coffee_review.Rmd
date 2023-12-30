@@ -1,0 +1,386 @@
+---
+title: "Coffee_review"
+output: html_document
+date: "2023-12-16"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(tidytext)
+library(scales)
+library(tidyr)
+library(dplyr)
+library(gcookbook)
+library(stringr)
+library(wordcloud)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1. Introduction
+The purpose of this project is to visualize text data in coffee_review.csv, primarily in three columns: desc_1, desc_2, and desc_3. The visuals include the most common words, tf_idf, bigrams, and a world map showing the median price of coffee by region. 
+
+
+```{r cars}
+cr <- read.csv("coffee_review.csv")
+glimpse(cr)
+```
+#### 1.1 Check the level of the variable roast
+```{r }
+cr$roast[cr$roast == '']<- 'Unspecified'
+unique(cr$roast)
+```
+### 2. Text visuals
+#### 2.1 The most common words  
+
+```{r}
+cr1_freq <- unnest_tokens(cr, word, desc_1) %>% 
+  count(word, sort=TRUE)%>%
+  filter(n>1150)%>%
+  mutate(word = reorder(word, n))%>%
+  anti_join(stop_words, by = join_by(word))%>% 
+  ggplot(aes(n,word))+
+  geom_col()+
+  labs(x = "Frequency", y= " ")
+cr1_freq
+```
+
+
+```{r, warning=FALSE}
+cr2_freq <- unnest_tokens(cr, word, desc_2) %>% 
+  count(word, sort=TRUE)%>%
+  filter(n>1150)%>%
+  mutate(word = reorder(word, n))%>%
+  anti_join(stop_words, by = join_by(word))
+ 
+
+ggplot(cr2_freq, aes(n,word))+
+  geom_point()+
+  geom_text(aes(label = n, check_overlap = FALSE), vjust=1.5, size = 4)+
+  labs(x = "Frequency", y= " ")+ 
+  theme(plot.title = element_text(hjust = 0.5, vjust = 3, size=16))
+```
+
+```{r}
+cr3_freq <- unnest_tokens(cr, word, desc_3) %>% 
+  count(word)%>%
+  anti_join(stop_words,by = join_by(word))%>% 
+  with(wordcloud(word,n, max.words = 100))
+
+```
+
+#### 2.2 Tf-idf
+##### 2.2.1 Create a table with four columns: roast, word, n, and total
+```{r}
+cr1_words <- unnest_tokens(cr, word, desc_1) %>%
+  count(roast, word, sort = TRUE)
+
+cr2_words <- unnest_tokens(cr, word, desc_2) %>%
+  count(roast,word, sort = TRUE)
+
+cr3_words <- unnest_tokens(cr, word, desc_3) %>%
+  count(roast,word, sort = TRUE)
+
+```
+
+
+
+```{r}
+total_1 <- cr1_words %>% 
+  summarize(total = sum(n))
+
+cr1_words <- cross_join(cr1_words, total_1)
+
+total_2 <- cr2_words %>% 
+  summarize(total = sum(n))
+
+cr2_words <- cross_join(cr2_words, total_2)
+
+total_3 <- cr3_words %>% 
+  summarize(total = sum(n))
+
+cr3_words <- cross_join(cr3_words, total_3)
+
+head(cr1_words)  
+head(cr2_words)
+head(cr3_words)
+
+```
+
+##### 2.2.2 Visualize term frequency by roast
+
+```{r, warning = FALSE}
+ggplot(cr1_words, aes(n/total, fill=roast)) +
+  geom_histogram(show.legend = FALSE, bins = 30) +
+  scale_fill_brewer(palette = "Set3")+
+  xlim(NA, 0.0009) +
+  facet_wrap(~roast, ncol = 2, scales = "free_y")
+
+```
+
+
+```{r, warning = FALSE}
+ggplot(cr2_words, aes(n/total, fill=roast)) +
+  geom_histogram(show.legend = FALSE, bins = 30) +
+  scale_fill_brewer(palette = "Set3")+
+  xlim(NA, 0.0009) +
+  facet_wrap(~roast, ncol = 2, scales = "free_y")
+```
+
+
+
+```{r, warning = FALSE}
+ggplot(cr3_words, aes(n/total, fill=roast)) +
+  geom_histogram(show.legend = FALSE, bins = 30) +
+  scale_fill_brewer(palette = "Set3")+
+  xlim(NA, 0.0009) +
+  facet_wrap(~roast, ncol = 2, scales = "free_y")
+```
+
+#### 2.2.3 bind_tf_idf() 
+
+```{r}
+cr1_tf_idf <- cr1_words%>%
+  bind_tf_idf(word, roast, n)%>%
+  arrange(desc(tf_idf))
+head(cr1_tf_idf)
+```
+
+##### 2.2.4 Highest tf-idf words
+```{r}
+cr1_tf_idf %>%
+  group_by(roast) %>%
+  distinct(tf_idf, .keep_all=TRUE)%>%
+  slice_max(tf_idf, n = 10) %>%
+  ungroup() %>% 
+  ggplot(aes(tf_idf,fct_reorder(word, tf_idf), fill = roast)) +
+  scale_fill_brewer(palette = "Set3")+
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~roast, ncol = 2, scales = "free") +
+  labs(x = "tf-idf", y = NULL)+
+  theme(text = element_text(size=8), plot.title = element_text(hjust = 0.5, vjust = 3))
+```
+
+
+#### 2.3 Bigrams 
+##### 2.3.1 Create a table with bigrams and roast
+```{r}
+cr1_bigrams <- cr%>%
+  unnest_tokens(bigram1, desc_1, token = "ngrams", n = 2) %>%
+  filter(!is.na(bigram1))%>%
+  select(roast, bigram1)
+
+head(cr1_bigrams)  
+```
+
+```{r}
+cr2_bigrams <- cr%>%
+  unnest_tokens(bigram2, desc_2, token = "ngrams", n = 2) %>%
+  filter(!is.na(bigram2))%>%
+  select(roast, bigram2)
+
+head(cr2_bigrams)
+```
+
+```{r}
+cr3_bigrams <- cr%>%
+  unnest_tokens(bigram3, desc_3, token = "ngrams", n = 2) %>%
+  filter(!is.na(bigram3))%>%
+  select(roast, bigram3) 
+
+head(cr3_bigrams)
+```
+
+
+##### 2.3.2 Split  bigrams and remove cases where either word is a stop word
+```{r}
+cr1_separated <- cr1_bigrams%>%
+  separate(bigram1, c("word1", "word2"), sep = " ")
+
+cr1_filtered <- cr1_separated%>%
+  filter(!word1%in% stop_words$word)%>%
+  filter(!word2%in% stop_words$word)
+
+cr1_counts <- cr1_filtered %>%
+  count(word1,word2, sort=TRUE)
+
+head(cr1_counts)
+```
+
+
+
+```{r}
+cr2_separated <- cr2_bigrams%>%
+  separate(bigram2, c("word1", "word2"), sep = " ")
+
+cr2_filtered <- cr2_separated%>%
+  filter(!word1%in% stop_words$word)%>%
+  filter(!word2%in% stop_words$word)
+
+cr2_counts <- cr2_filtered %>%
+  count(word1,word2, sort=TRUE)
+
+head(cr2_counts)
+```
+
+
+
+```{r}
+cr3_separated <- cr3_bigrams%>%
+  separate(bigram3, c("word1", "word2"), sep = " ")
+
+cr3_filtered <- cr3_separated%>%
+  filter(!word1%in% stop_words$word)%>%
+  filter(!word2%in% stop_words$word)
+
+cr3_counts <- cr3_filtered %>%
+  count(word1,word2, sort=TRUE)
+
+head(cr3_counts)
+```
+
+
+##### 2.3.3 Visualize bigrams
+```{r}
+cr1_united <- cr1_filtered %>%
+  unite(bigram1, word1, word2, sep = " ")
+
+cr1_tf_idf <- cr1_united %>%
+  group_by(roast)%>%
+  count(roast,bigram1) %>%
+  bind_tf_idf(bigram1, roast, n) %>%
+  arrange(desc(tf_idf))
+
+head(cr1_tf_idf)
+```
+
+
+```{r}
+cr1_tf_idf %>%
+  group_by(roast) %>%
+  slice_max(tf_idf, n = 10, with_ties = FALSE) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(bigram1, tf_idf), fill = roast)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~roast, ncol = 2, scales = "free") +
+  scale_fill_brewer(palette = "Set3")+
+  labs(x = "tf-idf", y = NULL )+
+  theme(text = element_text(size=8), plot.title = element_text(hjust = 0.5, vjust = 3))
+```
+
+```{r}
+cr2_united <- cr2_filtered %>%
+  unite(bigram2, word1, word2, sep = " ")
+
+cr2_tf_idf <- cr2_united %>%
+  group_by(roast)%>%
+  count(roast,bigram2) %>%
+  bind_tf_idf(bigram2, roast, n) %>%
+  arrange(desc(tf_idf))
+
+head(cr2_tf_idf)
+```
+
+
+```{r}
+cr2_tf_idf %>%
+  group_by(roast) %>%
+  slice_max(tf_idf, n = 10, with_ties = FALSE) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(bigram2, tf_idf), fill = roast)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~roast, ncol = 2, scales = "free") +
+  scale_fill_brewer(palette = "Set3")+
+  labs(x = "tf-idf", y = NULL )+
+  theme(text = element_text(size=8), plot.title = element_text(hjust = 0.5, vjust = 3))
+```
+
+
+```{r}
+cr3_united <- cr3_filtered %>%
+  unite(bigram3, word1, word2, sep = " ")
+
+cr3_tf_idf <- cr3_united %>%
+  group_by(roast)%>%
+  count(roast,bigram3) %>%
+  bind_tf_idf(bigram3, roast, n) %>%
+  arrange(desc(tf_idf))
+
+head(cr3_tf_idf)
+```
+
+
+```{r}
+cr3_tf_idf %>%
+  group_by(roast) %>%
+  slice_max(tf_idf, n = 10, with_ties = FALSE) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(bigram3, tf_idf), fill = roast)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~roast, ncol = 2, scales = "free") +
+  scale_fill_brewer(palette = "Set3")+
+  labs(x = "tf-idf", y = NULL )+
+  theme(text = element_text(size=8), plot.title = element_text(hjust = 0.5, vjust = 3))
+```
+
+
+#### 2.4 Map region by the median coffee price
+
+```{r}
+world <- map_data("world")
+worldplot <- ggplot() +
+  geom_polygon(data = world, aes(x=long, y = lat, group = group)) + 
+  coord_fixed(1.3)
+```
+
+##### 2.4.1 Rename selected regions 
+```{r}
+cr$loc_country [cr$loc_country == "United States And Floyd"]<-"United States"
+cr$loc_country [cr$loc_country == "England"]<-"United Kingdom"
+cr$loc_country [cr$loc_country == "New Taiwan"]<-"Taiwan"
+cr$loc_country [cr$loc_country == "Hawai'i"]<-"Hawaii"
+unique(cr$loc_country)
+```
+
+##### 2.4.2 Create cr_map by including loc_country and the median price of coffee by region
+```{r}
+cr_map <- cr%>%
+  group_by(loc_country)%>%
+  summarise_at(vars(X100g_USD), list(Price_usd= median))%>%
+  select(region=loc_country, Price_usd)
+
+```
+
+
+##### 2.4.3  Check dataset differences and merge both datasets
+```{r}
+diff <- setdiff(world$region, cr_map$region)
+
+worldSubset <- left_join(world, cr_map, by = "region")
+head(worldSubset)
+```
+
+
+##### 2.4.4 Plot the final map to illustrate the median price of coffee by region
+
+```{r}
+plain <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(fill = "White"),
+  plot.title = element_text(hjust = 0.5)
+)
+
+coffee_Price<- ggplot(data = worldSubset, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) +
+  geom_polygon(aes(fill = Price_usd)) +
+  scale_fill_distiller(palette ="YlOrBr", direction = -1) + 
+  plain
+
+coffee_Price
+```
+
