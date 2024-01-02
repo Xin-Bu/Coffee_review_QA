@@ -14,15 +14,18 @@ The purpose of this project is to visualize text data in coffee_review.csv using
 
 ### Selected text visuals with R
 * A wordcloud of the most common words:
-
 ![word_cloud](https://github.com/Xin-Bu/LLMs/assets/69817896/799d1cbe-a81d-47b3-8662-c1d73a1e7ccd)
 
 * Term frequency by roast:
-
 ![term_frequency](https://github.com/Xin-Bu/Coming_soon_coffee_review_QA/assets/69817896/a8ab25c6-0cf3-45d3-93bb-ad4d65da94d5)
 
+* A network of bigrams
+
+![bigrams_visual](https://github.com/Xin-Bu/Coffee_review_text_QA_LLMs/assets/69817896/4fb4766a-f9e8-4de4-823a-90c6ae90fa3a)
+
 * A world map illustrating the median coffee price by region:
-![coffee_price_region](https://github.com/Xin-Bu/Coming_soon_coffee_review_QA/assets/69817896/d40b9487-4d1e-476d-8328-2565baa135d5)
+![coffee_price](https://github.com/Xin-Bu/Coffee_review_text_QA_LLMs/assets/69817896/d4c7c83f-1344-4eb4-a051-cb88a7934381)
+
 
 ### Procedures of LangChain QA application with Python
 * Load documents
