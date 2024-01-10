@@ -6,9 +6,13 @@
 ### Dataset
 The dataset in this project contains two files: coffee_review.pdf and coffee_review.csv. Both are from the same data source. The file coffee_review.pdf has customer review text data only, the basic information of which is shown in the table below. In the coffee_review.csv file, we have 2,095 rows and 12 columns including `name`,`roaster`,`roast`, `loc_country`, `origin_1`, `origin_2`, `100g_USD`, `rating`, `review_date`, `desc_1`, `desc_2`, and `desc_3`. 
 
-| tokens | unique_tokens | avg_token_length | lexical_diversity | top_n | 
-| :---:  | :---: | :---: | :---: | :---: | 
-| 41,064 | 3,070 | 6.45  | 0.07  | cup;aroma,mouthfeel,acidity,structure,finish,notes,sweet,cocoa,chocolate,syrupy| 
+| Items | Descriptive statistics |  
+| :---:  | :---: |
+| tokens | 41,064 |
+| unique_tokens | 3,070 |
+| avg_token_length | 6.45 |
+| lexical_diversity | 0.07  |
+| top_n | cup;aroma,mouthfeel,acidity,structure,finish,notes,sweet,cocoa,chocolate,syrupy |
 
 The purpose of this project is to visualize text data in coffee_review.csv using R and to build a platform using python to ask and answer questions from the file coffee_review.pdf. The R code in this project for the visuals was written in R Markdown and knitted to html. 
 
