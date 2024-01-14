@@ -4,7 +4,7 @@
 
 [Image source](https://www.ncausa.org/About-Coffee)
 ### Dataset
-The dataset in this project contains two files: coffee_review.pdf and coffee_review.csv. Both are from the same data source. The file coffee_review.pdf has customer review text data only, the basic information of which is shown in the table below. In the coffee_review.csv file, we have 2,095 rows and 12 columns including `name`,`roaster`,`roast`, `loc_country`, `origin_1`, `origin_2`, `100g_USD`, `rating`, `review_date`, `desc_1`, `desc_2`, and `desc_3`. 
+The dataset in this project contains two files: coffee_review.pdf and coffee_review.csv. Both are from the same data source. The file coffee_review.pdf has customer review text data only, the basic information of which is shown in the table below. The file coffee_review.csv has 2,095 rows and 12 columns. The columns are: `name`,`roaster`,`roast`, `loc_country`, `origin_1`, `origin_2`, `100g_USD`, `rating`, `review_date`, `desc_1`, `desc_2`, and `desc_3`. 
 
 | Items | Descriptive statistics |  
 | :---:  | :---: |
@@ -23,7 +23,7 @@ The purpose of this project is to visualize text data in coffee_review.csv using
 * Term frequency by roast:
 ![term_frequency](https://github.com/Xin-Bu/Coming_soon_coffee_review_QA/assets/69817896/a8ab25c6-0cf3-45d3-93bb-ad4d65da94d5)
 
-* A network of bigrams
+* A network of bigrams:
 
 ![bigrams_visual](https://github.com/Xin-Bu/Coffee_review_text_QA_LLMs/assets/69817896/4fb4766a-f9e8-4de4-823a-90c6ae90fa3a)
 
